@@ -2,7 +2,6 @@ from flow_utilities.db import load_df_to_db
 import pandas as pd
 import prefect
 from prefect import task, Flow
-from prefect.run_configs import DockerRun
 from prefect.storage import GitHub
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
@@ -23,7 +22,7 @@ def extract_and_load(dataset: str) -> None:
     logger.info("Dataset %s with %d rows loaded to DB", dataset, len(df))
 
 
-with Flow(FLOW_NAME, storage=STORAGE, run_config=DockerRun(image="elt:latest")) as flow:
+with Flow(FLOW_NAME, storage=STORAGE) as flow:
     extract_load_id = create_flow_run(
         flow_name="extract_load_dev",
         project_name="elt-dev",

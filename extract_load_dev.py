@@ -3,7 +3,6 @@ import pandas as pd
 import prefect
 from prefect import task, Flow
 from prefect.executors import LocalDaskExecutor
-from prefect.run_configs import DockerRun
 from prefect.storage import GitHub
 
 
@@ -24,11 +23,6 @@ def extract_and_load(dataset: str) -> pd.DataFrame:
     logger.info("Dataset %s with %d rows loaded to DB", dataset, len(df))
 
 
-with Flow(
-    FLOW_NAME,
-    executor=LocalDaskExecutor(),
-    storage=STORAGE,
-    run_config=DockerRun(image="elt:latest"),
-) as flow:
+with Flow(FLOW_NAME, executor=LocalDaskExecutor(), storage=STORAGE,) as flow:
     datasets = ["raw_customers", "raw_orders", "raw_payments"]
     dataframes = extract_and_load.map(datasets)

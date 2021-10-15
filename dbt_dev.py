@@ -2,7 +2,6 @@ import prefect
 from prefect import task, Flow, Parameter
 from prefect.client import Secret
 from prefect.tasks.dbt.dbt import DbtShellTask
-from prefect.run_configs import DockerRun
 from prefect.storage import GitHub
 from prefect.triggers import all_finished, always_run
 import pygit2
@@ -58,7 +57,7 @@ def print_dbt_output(output):
         logger.info(line)
 
 
-with Flow(FLOW_NAME, storage=STORAGE, run_config=DockerRun(image="elt:latest")) as flow:
+with Flow(FLOW_NAME, storage=STORAGE) as flow:
     del_task = delete_dbt_folder_if_exists()
     dbt_repo = Parameter(
         "dbt_repo_url", default="https://github.com/anna-geller/jaffle_shop"

@@ -1,6 +1,5 @@
 import prefect
 from prefect import task, Flow
-from prefect.run_configs import DockerRun
 from prefect.storage import GitHub
 
 FLOW_NAME = "refresh_dashboard_dev"
@@ -25,7 +24,7 @@ def update_sales_dashboards():
     logger.info("Sales dashboard extracts updated!")
 
 
-with Flow(FLOW_NAME, storage=STORAGE, run_config=DockerRun(image="elt:latest")) as flow:
+with Flow(FLOW_NAME, storage=STORAGE) as flow:
     customers = update_customers_dashboards()
     sales = update_sales_dashboards()
     customers.set_downstream(sales)
