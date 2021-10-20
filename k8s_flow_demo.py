@@ -5,7 +5,7 @@ from prefect.client.secrets import Secret
 # from flow_utilities.db_utils import get_db_connection_string
 
 
-FLOW_NAME = "k8_flow_demo"
+FLOW_NAME = "k8s_flow_demo"
 STORAGE = GitHub(
     repo="anna-geller/flow-of-flows",
     path=f"{FLOW_NAME}.py",
