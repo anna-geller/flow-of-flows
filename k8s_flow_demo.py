@@ -25,7 +25,7 @@ with Flow(
         storage=STORAGE,
         run_config=KubernetesRun(
             # image="338306982838.dkr.ecr.eu-central-1.amazonaws.com/community:latest",
-            # labels=["k8s"],
+            labels=["k8s"],
             # env={
             #     "AWS_ACCESS_KEY_ID": Secret("AWS_ACCESS_KEY_ID").get(),
             #     "AWS_SECRET_ACCESS_KEY": Secret("AWS_SECRET_ACCESS_KEY").get(),
