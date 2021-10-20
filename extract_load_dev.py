@@ -1,9 +1,10 @@
-from flow_utilities.db import load_df_to_db
+from flow_utilities.db_utils import load_df_to_db
 import pandas as pd
 import prefect
 from prefect import task, Flow
 from prefect.executors import LocalDaskExecutor
 from prefect.storage import GitHub
+from prefect.run_configs import LocalRun
 
 
 FLOW_NAME = "extract_load_dev"
@@ -23,6 +24,11 @@ def extract_and_load(dataset: str) -> pd.DataFrame:
     logger.info("Dataset %s with %d rows loaded to DB", dataset, len(df))
 
 
-with Flow(FLOW_NAME, executor=LocalDaskExecutor(), storage=STORAGE,) as flow:
+with Flow(
+    FLOW_NAME,
+    executor=LocalDaskExecutor(),
+    storage=STORAGE,
+    run_config=LocalRun(labels=["elt"]),
+) as flow:
     datasets = ["raw_customers", "raw_orders", "raw_payments"]
     dataframes = extract_and_load.map(datasets)
