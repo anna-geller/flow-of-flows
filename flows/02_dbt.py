@@ -4,15 +4,16 @@ from prefect.client import Secret
 from prefect.tasks.dbt.dbt import DbtShellTask
 from prefect.storage import GitHub
 from prefect.triggers import all_finished, always_run
+from prefect.run_configs import LocalRun
 import pygit2
 import shutil
 
 
 DBT_PROJECT = "jaffle_shop"
-FLOW_NAME = "dbt_dev"
+FLOW_NAME = "02_dbt"
 STORAGE = GitHub(
     repo="anna-geller/flow-of-flows",
-    path=f"{FLOW_NAME}.py",
+    path=f"flows/{FLOW_NAME}.py",
     access_token_secret="GITHUB_ACCESS_TOKEN",
 )
 
@@ -57,7 +58,7 @@ def print_dbt_output(output):
         logger.info(line)
 
 
-with Flow(FLOW_NAME, storage=STORAGE) as flow:
+with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun()) as flow:
     del_task = delete_dbt_folder_if_exists()
     dbt_repo = Parameter(
         "dbt_repo_url", default="https://github.com/anna-geller/jaffle_shop"
@@ -74,3 +75,7 @@ with Flow(FLOW_NAME, storage=STORAGE) as flow:
     dbt_run.set_downstream(dbt_test)
     del_again = delete_dbt_folder_if_exists()
     dbt_test_out.set_downstream(del_again)
+
+
+if __name__ == "__main__":
+    flow.visualize()

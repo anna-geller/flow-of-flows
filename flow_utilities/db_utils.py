@@ -19,7 +19,7 @@ def get_df_from_sql_query(table_or_query: str) -> pd.DataFrame:
     return pd.read_sql(table_or_query, engine)
 
 
-def load_df_to_db(df: pd.DataFrame, table_name: str, schema: str = "jaffle_shop"):
+def load_df_to_db(df: pd.DataFrame, table_name: str, schema: str = "jaffle_shop") -> None:
     conn_string = get_db_connection_string()
     db_engine = create_engine(conn_string)
     conn = db_engine.connect()

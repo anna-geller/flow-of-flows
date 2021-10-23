@@ -7,10 +7,10 @@ from prefect.storage import GitHub
 from prefect.run_configs import LocalRun
 
 
-FLOW_NAME = "extract_load_dev"
+FLOW_NAME = "01_extract_load"
 STORAGE = GitHub(
     repo="anna-geller/flow-of-flows",
-    path=f"{FLOW_NAME}.py",
+    path=f"flows/{FLOW_NAME}.py",
     access_token_secret="GITHUB_ACCESS_TOKEN",
 )
 
@@ -28,7 +28,7 @@ with Flow(
     FLOW_NAME,
     executor=LocalDaskExecutor(),
     storage=STORAGE,
-    run_config=LocalRun(labels=["elt"]),
+    run_config=LocalRun(),
 ) as flow:
     datasets = ["raw_customers", "raw_orders", "raw_payments"]
     dataframes = extract_and_load.map(datasets)

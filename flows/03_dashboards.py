@@ -1,11 +1,12 @@
 import prefect
 from prefect import task, Flow
 from prefect.storage import GitHub
+from prefect.run_configs import LocalRun
 
-FLOW_NAME = "refresh_dashboard_dev"
+FLOW_NAME = "03_dashboards"
 STORAGE = GitHub(
     repo="anna-geller/flow-of-flows",
-    path=f"{FLOW_NAME}.py",
+    path=f"flows/{FLOW_NAME}.py",
     access_token_secret="GITHUB_ACCESS_TOKEN",
 )
 
@@ -24,7 +25,7 @@ def update_sales_dashboards():
     logger.info("Sales dashboard extracts updated!")
 
 
-with Flow(FLOW_NAME, storage=STORAGE) as flow:
+with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun()) as flow:
     customers = update_customers_dashboards()
     sales = update_sales_dashboards()
     customers.set_downstream(sales)
