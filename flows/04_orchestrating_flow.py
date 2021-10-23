@@ -12,7 +12,7 @@ STORAGE = GitHub(
 PROJECT_NAME = "jaffle_shop"
 
 
-with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun()) as flow:
+with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as flow:
     extract_load_id = create_flow_run(
         flow_name="01_extract_load",
         project_name=PROJECT_NAME,
@@ -30,12 +30,15 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun()) as flow:
     )
     extract_load_wait_task.set_downstream(transform_id)
 
-    dashboards = create_flow_run(
+    dashboards_id = create_flow_run(
         flow_name="03_dashboards",
         project_name=PROJECT_NAME,
         task_args={"name": "Dashboards"},
     )
-    transform_id_wait_task.set_downstream(dashboards)
+    dashboards_wait_task = wait_for_flow_run(
+        dashboards_id, task_args={"name": "Dashboards - wait"}
+    )
+    transform_id_wait_task.set_downstream(dashboards_id)
 
 
 if __name__ == "__main__":

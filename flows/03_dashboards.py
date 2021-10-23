@@ -25,7 +25,7 @@ def update_sales_dashboards():
     logger.info("Sales dashboard extracts updated!")
 
 
-with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun()) as flow:
+with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as flow:
     customers = update_customers_dashboards()
     sales = update_sales_dashboards()
     customers.set_downstream(sales)

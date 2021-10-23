@@ -58,7 +58,7 @@ def print_dbt_output(output):
         logger.info(line)
 
 
-with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun()) as flow:
+with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as flow:
     del_task = delete_dbt_folder_if_exists()
     dbt_repo = Parameter(
         "dbt_repo_url", default="https://github.com/anna-geller/jaffle_shop"

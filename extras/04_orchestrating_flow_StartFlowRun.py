@@ -13,7 +13,7 @@ PROJECT_NAME = "jaffle_shop"
 start_flow_run = StartFlowRun(project_name=PROJECT_NAME, wait=True)
 
 
-with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun()) as flow:
+with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as flow:
     staging = start_flow_run(flow_name="01_extract_load", task_args={"name": "Stage"})
     dbt_run = start_flow_run(flow_name="02_dbt", task_args={"name": "DBT"})
     dashboards = start_flow_run(flow_name="03_dashboards", task_args={"name": "Refresh"})

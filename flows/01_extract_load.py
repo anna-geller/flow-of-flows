@@ -28,7 +28,7 @@ with Flow(
     FLOW_NAME,
     executor=LocalDaskExecutor(),
     storage=STORAGE,
-    run_config=LocalRun(),
+    run_config=LocalRun(labels=["dev"]),
 ) as flow:
     datasets = ["raw_customers", "raw_orders", "raw_payments"]
     dataframes = extract_and_load.map(datasets)
