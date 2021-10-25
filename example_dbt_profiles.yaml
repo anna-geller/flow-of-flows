@@ -1,0 +1,14 @@
+# Inlude this file in: /Users/your_user_name/.dbt/profiles.yml
+jaffle_shop:
+  outputs:
+    dev:
+      client_session_keep_alive: false
+      dbname: postgres
+      host: localhost
+      password: your_password_1234
+      port: 5432
+      schema: jaffle_shop
+      threads: 4
+      type: postgres
+      user: postgres
+  target: dev

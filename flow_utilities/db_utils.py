@@ -8,8 +8,8 @@ from sqlalchemy import create_engine
 
 
 def get_db_connection_string() -> str:
-    user = Secret("DBT__POSTGRES_USER").get()
-    pwd = Secret("DBT__POSTGRES_PASS").get()
+    user = Secret("POSTGRES_USER").get()
+    pwd = Secret("POSTGRES_PASS").get()
     return f"postgresql://{user}:{pwd}@localhost:5432/postgres"
 
 

@@ -1,9 +1,12 @@
+"""
+This flow is largely inspired by https://medium.com/slateco-blog/prefect-orchestrating-dbt-10f3ca0baea9
+"""
 import prefect
 from prefect import task, Flow, Parameter
 from prefect.client import Secret
 from prefect.tasks.dbt.dbt import DbtShellTask
 from prefect.storage import GitHub
-from prefect.triggers import all_finished, always_run
+from prefect.triggers import all_finished
 from prefect.run_configs import LocalRun
 import pygit2
 import shutil
@@ -23,9 +26,9 @@ def pull_dbt_repo(repo_url: str):
     pygit2.clone_repository(url=repo_url, path=DBT_PROJECT)
 
 
-@task(name="Delete DBT folder if exists", trigger=always_run)
+@task(name="Delete DBT folder if exists", trigger=all_finished)
 def delete_dbt_folder_if_exists():
-    shutil.rmtree(DBT_PROJECT, ignore_errors=True)  # Delete folder on run
+    shutil.rmtree(DBT_PROJECT, ignore_errors=True)
 
 
 dbt = DbtShellTask(
@@ -43,8 +46,8 @@ dbt = DbtShellTask(
         "port": 5432,
         "dbname": "postgres",
         "schema": DBT_PROJECT,
-        "user": Secret("DBT__POSTGRES_USER").get(),
-        "password": Secret("DBT__POSTGRES_PASS").get(),
+        "user": Secret("POSTGRES_USER").get(),
+        "password": Secret("POSTGRES_PASS").get(),
         "threads": 4,
         "client_session_keep_alive": False,
     },
@@ -73,9 +76,6 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
     dbt_test = dbt(command="dbt test", task_args={"name": "DBT Test"})
     dbt_test_out = print_dbt_output(dbt_test, task_args={"name": "DBT Test Output"})
     dbt_run.set_downstream(dbt_test)
+
     del_again = delete_dbt_folder_if_exists()
     dbt_test_out.set_downstream(del_again)
-
-
-if __name__ == "__main__":
-    flow.visualize()

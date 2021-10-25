@@ -3,8 +3,8 @@ import pandas as pd
 import prefect
 from prefect import task, Flow
 from prefect.executors import LocalDaskExecutor
-from prefect.storage import GitHub
 from prefect.run_configs import LocalRun
+from prefect.storage import GitHub
 
 
 FLOW_NAME = "01_extract_load"
@@ -16,7 +16,7 @@ STORAGE = GitHub(
 
 
 @task
-def extract_and_load(dataset: str) -> pd.DataFrame:
+def extract_and_load(dataset: str) -> None:
     logger = prefect.context.get("logger")
     file = f"https://raw.githubusercontent.com/anna-geller/jaffle_shop/main/data/{dataset}.csv"
     df = pd.read_csv(file)
