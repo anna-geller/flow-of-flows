@@ -20,7 +20,3 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
 
     staging.set_downstream(dbt_run)
     dbt_run.set_downstream(dashboards)
-
-
-if __name__ == "__main__":
-    flow.visualize()

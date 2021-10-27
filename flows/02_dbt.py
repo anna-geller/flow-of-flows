@@ -22,8 +22,8 @@ STORAGE = GitHub(
 
 
 @task(name="Clone DBT repo")
-def pull_dbt_repo(repo_url: str):
-    pygit2.clone_repository(url=repo_url, path=DBT_PROJECT)
+def pull_dbt_repo(repo_url: str, branch: str = None):
+    pygit2.clone_repository(url=repo_url, path=DBT_PROJECT, checkout_branch=branch)
 
 
 @task(name="Delete DBT folder if exists", trigger=all_finished)
@@ -66,7 +66,8 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
     dbt_repo = Parameter(
         "dbt_repo_url", default="https://github.com/anna-geller/jaffle_shop"
     )
-    pull_task = pull_dbt_repo(dbt_repo)
+    dbt_repo_branch = Parameter("dbt_repo_branch", default=None)
+    pull_task = pull_dbt_repo(dbt_repo, dbt_repo_branch)
     del_task.set_downstream(pull_task)
 
     dbt_run = dbt(command="dbt run", task_args={"name": "DBT Run"})
@@ -79,3 +80,5 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
 
     del_again = delete_dbt_folder_if_exists()
     dbt_test_out.set_downstream(del_again)
+
+flow.set_reference_tasks([dbt_run])

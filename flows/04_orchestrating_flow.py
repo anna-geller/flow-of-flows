@@ -39,7 +39,3 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
         dashboards_id, task_args={"name": "Dashboards - wait"}
     )
     transform_id_wait_task.set_downstream(dashboards_id)
-
-
-if __name__ == "__main__":
-    flow.visualize()
