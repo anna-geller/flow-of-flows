@@ -19,14 +19,17 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
         task_args={"name": "Staging"},
     )
     extract_load_wait_task = wait_for_flow_run(
-        extract_load_id, task_args={"name": "Staging - wait"}
+        extract_load_id, raise_final_state=True, task_args={"name": "Staging - wait"}
     )
 
     transform_id = create_flow_run(
-        flow_name="02_dbt", project_name=PROJECT_NAME, task_args={"name": "DBT flow"}
+        flow_name="02_dbt",
+        project_name=PROJECT_NAME,
+        raise_final_state=True,
+        task_args={"name": "DBT flow"},
     )
     transform_id_wait_task = wait_for_flow_run(
-        transform_id, task_args={"name": "DBT flow - wait"}
+        transform_id, raise_final_state=True, task_args={"name": "DBT flow - wait"}
     )
     extract_load_wait_task.set_downstream(transform_id)
 
@@ -36,6 +39,6 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
         task_args={"name": "Dashboards"},
     )
     dashboards_wait_task = wait_for_flow_run(
-        dashboards_id, task_args={"name": "Dashboards - wait"}
+        dashboards_id, raise_final_state=True, task_args={"name": "Dashboards - wait"}
     )
     transform_id_wait_task.set_downstream(dashboards_id)
