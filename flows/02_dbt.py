@@ -32,6 +32,11 @@ def delete_dbt_folder_if_exists():
     shutil.rmtree(DBT_PROJECT, ignore_errors=True)
 
 
+@task
+def get_dbt_credentials(user_name: str, password: str):
+    return {"user": user_name, "password": password}
+
+
 dbt = DbtShellTask(
     return_all=True,
     profile_name=DBT_PROJECT,
@@ -41,6 +46,15 @@ dbt = DbtShellTask(
     log_stdout=True,
     helper_script=f"cd {DBT_PROJECT}",
     log_stderr=True,
+    dbt_kwargs={
+        "type": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "dbname": "postgres",
+        "schema": DBT_PROJECT,
+        "threads": 4,
+        "client_session_keep_alive": False,
+    },
 )
 
 
@@ -63,38 +77,15 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
 
     postgres_user = PrefectSecret("POSTGRES_USER")
     postgres_pass = PrefectSecret("POSTGRES_PASS")
+    db_credentials = get_dbt_credentials(postgres_user, postgres_pass)
     dbt_run = dbt(
-        command="dbt run",
-        task_args={"name": "DBT Run"},
-        dbt_kwargs={
-            "type": "postgres",
-            "host": "localhost",
-            "port": 5432,
-            "dbname": "postgres",
-            "schema": DBT_PROJECT,
-            "user": postgres_user,
-            "password": postgres_pass,
-            "threads": 4,
-            "client_session_keep_alive": False,
-        },
+        command="dbt run", task_args={"name": "DBT Run"}, dbt_kwargs=db_credentials
     )
     dbt_run_out = print_dbt_output(dbt_run, task_args={"name": "DBT Run Output"})
     pull_task.set_downstream(dbt_run)
 
     dbt_test = dbt(
-        command="dbt test",
-        task_args={"name": "DBT Test"},
-        dbt_kwargs={
-            "type": "postgres",
-            "host": "localhost",
-            "port": 5432,
-            "dbname": "postgres",
-            "schema": DBT_PROJECT,
-            "user": postgres_user,
-            "password": postgres_pass,
-            "threads": 4,
-            "client_session_keep_alive": False,
-        },
+        command="dbt test", task_args={"name": "DBT Test"}, dbt_kwargs=db_credentials
     )
     dbt_test_out = print_dbt_output(dbt_test, task_args={"name": "DBT Test Output"})
     dbt_run.set_downstream(dbt_test)
