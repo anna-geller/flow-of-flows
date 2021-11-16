@@ -10,6 +10,7 @@ from prefect.triggers import all_finished
 from prefect.run_configs import LocalRun
 import pygit2
 import shutil
+from prefect.tasks.secrets import PrefectSecret
 
 
 DBT_PROJECT = "jaffle_shop"
@@ -40,17 +41,6 @@ dbt = DbtShellTask(
     log_stdout=True,
     helper_script=f"cd {DBT_PROJECT}",
     log_stderr=True,
-    dbt_kwargs={
-        "type": "postgres",
-        "host": "localhost",
-        "port": 5432,
-        "dbname": "postgres",
-        "schema": DBT_PROJECT,
-        "user": Secret("POSTGRES_USER").get(),
-        "password": Secret("POSTGRES_PASS").get(),
-        "threads": 4,
-        "client_session_keep_alive": False,
-    },
 )
 
 
@@ -62,6 +52,7 @@ def print_dbt_output(output):
 
 
 with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as flow:
+
     del_task = delete_dbt_folder_if_exists()
     dbt_repo = Parameter(
         "dbt_repo_url", default="https://github.com/anna-geller/jaffle_shop"
@@ -70,11 +61,41 @@ with Flow(FLOW_NAME, storage=STORAGE, run_config=LocalRun(labels=["dev"])) as fl
     pull_task = pull_dbt_repo(dbt_repo, dbt_repo_branch)
     del_task.set_downstream(pull_task)
 
-    dbt_run = dbt(command="dbt run", task_args={"name": "DBT Run"})
+    postgres_user = PrefectSecret("POSTGRES_USER")
+    postgres_pass = PrefectSecret("POSTGRES_PASS")
+    dbt_run = dbt(
+        command="dbt run",
+        task_args={"name": "DBT Run"},
+        dbt_kwargs={
+            "type": "postgres",
+            "host": "localhost",
+            "port": 5432,
+            "dbname": "postgres",
+            "schema": DBT_PROJECT,
+            "user": postgres_user,
+            "password": postgres_pass,
+            "threads": 4,
+            "client_session_keep_alive": False,
+        },
+    )
     dbt_run_out = print_dbt_output(dbt_run, task_args={"name": "DBT Run Output"})
     pull_task.set_downstream(dbt_run)
 
-    dbt_test = dbt(command="dbt test", task_args={"name": "DBT Test"})
+    dbt_test = dbt(
+        command="dbt test",
+        task_args={"name": "DBT Test"},
+        dbt_kwargs={
+            "type": "postgres",
+            "host": "localhost",
+            "port": 5432,
+            "dbname": "postgres",
+            "schema": DBT_PROJECT,
+            "user": postgres_user,
+            "password": postgres_pass,
+            "threads": 4,
+            "client_session_keep_alive": False,
+        },
+    )
     dbt_test_out = print_dbt_output(dbt_test, task_args={"name": "DBT Test Output"})
     dbt_run.set_downstream(dbt_test)
 
