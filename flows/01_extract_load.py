@@ -32,5 +32,3 @@ with Flow(
 ) as flow:
     datasets = ["raw_customers", "raw_orders", "raw_payments"]
     dataframes = extract_and_load.map(datasets)
-
-flow.run()
