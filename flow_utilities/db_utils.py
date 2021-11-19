@@ -1,6 +1,9 @@
 """
 Using local DB in docker:
 docker run -d --name demo_postgres -v dbdata:/var/lib/postgresql/data -p 5432:5432 -e POSTGRES_PASSWORD=xyz postgres:11
+
+Once you connected to the database, run the following SQL command:
+create schema if not exists jaffle_shop;
 """
 import pandas as pd
 from prefect.client import Secret
