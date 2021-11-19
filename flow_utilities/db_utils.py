@@ -1,9 +1,6 @@
 """
 Using local DB in docker:
 docker run -d --name demo_postgres -v dbdata:/var/lib/postgresql/data -p 5432:5432 -e POSTGRES_PASSWORD=xyz postgres:11
-
-Once you connected to the database, run the following SQL command:
-create schema if not exists jaffle_shop;
 """
 import pandas as pd
 from prefect.client import Secret
@@ -26,6 +23,6 @@ def load_df_to_db(df: pd.DataFrame, table_name: str, schema: str = "jaffle_shop"
     conn_string = get_db_connection_string()
     db_engine = create_engine(conn_string)
     conn = db_engine.connect()
-    conn.execute(f"DROP TABLE IF EXISTS {schema}.{table_name};")
-    df.to_sql(table_name, schema=schema, con=db_engine, index=False)
+    conn.execute("CREATE SCHEMA IF NOT EXISTS jaffle_shop;")
+    df.to_sql(table_name, schema=schema, if_exists="replace", con=db_engine, index=False)
     conn.close()
